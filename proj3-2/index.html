@@ -1,7 +1,138 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+    div.padded {
+      padding-top: 0px;
+      padding-right: 100px;
+      padding-bottom: 0.25in;
+      padding-left: 100px;
+    }
+  </style>
+<title>Your Name  |  CS 184</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<br />
+<h1 align="middle">Assignment 3-2: PathTracer Part 2</h1>
+    <h2 align="middle">Mark Presten and Adi Ganapathi</h2>
+
+    <div class="padded">
+        <p> This project is an extension of Project 3-1 that was centralized around ray tracing. Using our implementation from the last assignment, we added features to make pictures and scenes look even more realistic by modeling complex materials and camera parameters. Specifically, we implemented ways to model reflection and refraction in mirror glass and materials. We also modeled depth field effects by simulating a thin lens, allowing us to re-focus an image. </p>
+
+    <h2 align="middle">Part 1: Mirror and Glass Materials</h2>
+        <p>Below you will find the CBspheres.dae scene rendered with varying max_ray_depth’s: 0, 1, 2, 3, 4, 5, and 100. The images were generated with 512 samples per pixel, 4 samples per light, and using a 480 x 360 render window. </p>
+
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/CBspheres_m0.png" width="400px" />
+                    <figcaption align="middle">M = 0</figcaption>
+                    </td>
+                    <td align="middle">
+                    <img src="images/CBspheres_m1.png" width="400px" />
+                    <figcaption align="middle"> M = 1</figcaption>
+                    </td>
+                    <td align="middle">
+                    <img src="images/CBspheres_m2.png" width="400px" />
+                    <figcaption align="middle"> M = 2</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                    <img src="images/CBspheres_m3.png" width="400px" />
+                    <figcaption align="middle"> M = 3</figcaption>
+                    </td>
+                    <td align="middle">
+                    <img src="images/CBspheres_m4.png" width="400px" />
+                    <figcaption align="middle"> M = 4</figcaption>
+                    </td>
+                    <td align="middle">
+                    <img src="images/CBspheres_m5.png" width="400px" />
+                    <figcaption align="middle"> M = 5</figcaption>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="middle">
+                    <img src="images/CBspheres_m100.png" width="400px" />
+                    <figcaption align="middle">M = 100</figcaption>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <p>In the first image where max_ray_depth [m] = 0, we see only the light source. This makes sense because we are tracing 0 rays and thus the light source is not emitted on any of the objects in the scene. The next image has m = 1, meaning we trace the ray only from the light source to the first object that it hits. Thus, you will notice the 3 surrounding walls are lit as well as the floor when compared to m = 0. You will also see that the top of both spheres has a “white spot,” which is indicative of the ray from the lightsource hitting the mirror and glass materials respectively. Notice the glass material white spot is less prominent than the mirror material - this is due to the refractive properties of glass, which means not all light is fully reflected. Given m = 1, we do not see effects of refraction and therefore only the reflective aspects are shown (making the white spot more pixelated).</p>
+
+        <p>The next image is generated with m = 2. You’ll notice many differences from the m = 1 image. First, the ceiling is now lit because light is reflected off the floors and spheres back up given we can now trace two rays. Also, all the walls are brighter due to the similar reasoning; two rays hitting the walls/floors instead of one. Furthermore, the shadows below the spheres are no longer black and have color due the reflection off of the walls. Most importantly, we now see the material properties of the spheres. Given m = 2 rays, the mirror sphere now shows the reflected light from the neighboring objects (light source, walls, and the other sphere). See the image for an example of this two-bounce ray that reveals reflection. In the mirror sphere, we still do not get refraction, as the first ray intersects with the boundary and the sphere, and the second intersects hits the inner-portion of the sphere, thus never making it to the camera. Given the glass sphere does have reflection properties, we see the other objects in the scene faintly reflected off of it, but not as strongly as the mirror sphere. </p>
+
+        <p>The following image is m = 3. Again, the walls are brighter due to the addition of more rays bouncing off other surfaces in the scene. The biggest change from m = 2 to m = 3 is that the glass sphere now refracts! This is because the first ray hits the boundary of the glass sphere, the second travels through the sphere, and third exits the sphere and thus can be seen by the theoretical ‘camera’ of the scene. This refraction is also the reason there is now a white spot below the sphere (ray from light source, through sphere, out of sphere to floor beneath it). Finally note the mirror sphere now shows the color of the ceiling due to the 3 rays (ray from light source, ray off of mirror sphere, ray off of ceiling). </p>
+
+        <p>The m = 4 rendering has a few small changes from m = 3. First, like before the scene is more brightly lit due to more ray bounces. The two next key observations can be seen in the mirror ball and on the right-most wall. In the mirror ball, the glass sphere no longer looks black. This is because the refracted ray that travels through the glass sphere can now exit and be reflected by the mirror sphere (ray from light source, travel through glass sphere, exit sphere, reflect off mirror ball). This same reasoning can be applied to the fact that we see this small white spot on the right-most wall, which is due to the refraction rays being able to pass through the glass sphere and then be reflected. </p>
+
+        <p>The image generated with m = 5 has very few changes from m = 4. Again, the scene is slightly more brightly lit due to more bounces. The top of the glass sphere has a more dense white spot due to the fact that more reflected rays are intersecting it. Furthermore, the shadows of both spheres look more realistic by being more colorful and acting as more of a gradient. This is due to more reflections off of the neighboring objects and the refracted rays that make it through the glass sphere then impacting these reflections. </p>
+
+        <p>Finally, the m = 100 rendering is very similar to m = 5. The overall scene is much more saturated in terms of lighting, and this can be best exhibited by looking at the mirror sphere. All reflections in the sphere are substantially brighter than m = 5, and this is due to the many more ray bounces of the neighboring objects. The other differences can be seen on the top and bottom of the glass sphere, which appear to be brighter. This is due to the excess bounces of rays both from refraction and reflection. </p>
+
+    <h2 align="middle">Part 4: Depth of Field</h2>
+    <p>In a pinhole camera model, all light comes through the center of the lens at (0,0,0). In a thin-lens camera model, light can come uniformly at random
+    through a disk of some arbitrary radius. In a thin-lens model, light coming in through different points on the lens can contribute to the same pixel causing
+    some sense of "noise". This is why the pinhole camera model is an idealized model.</p>
+    <p>Below, we keep the lens radius constant and vary the focal distance.</p>
+    <div align="center">
+        <table style="width=100%">
+            <tr>
+                <td align="middle">
+                <img src="images/CBdragon_b0-1_d3-5.png" width="400px" />
+                <figcaption align="middle">B: 0.1, D: 3.5</figcaption>
+                </td>
+                <td align="middle">
+                <img src="images/CBdragon_b0-1_d4-0.png" width="400px" />
+                <figcaption align="middle">B: 0.1, D: 4.0</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td align="middle">
+                <img src="images/CBdragon_b0-1_d4-2.png" width="400px" />
+                <figcaption align="middle">B: 0.1, D: 4.2</figcaption>
+                </td>
+                <td align="middle">
+                <img src="images/CBdragon_b0-1_d4-5.png" width="400px" />
+                <figcaption align="middle">B: 0.1, D: 4.5</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <p>Below, we keep the focal distance constant and vary the lens radius.</p>
+
+    <div align="center">
+        <table style="width=100%">
+            <tr>
+                <td align="middle">
+                <img src="images/CBdragon_b0-4_d4-5.png" width="400px" />
+                <figcaption align="middle">B: 0.4, D: 4.5</figcaption>
+                </td>
+                <td align="middle">
+                <img src="images/CBdragon_b0-3_d4-5.png" width="400px" />
+                <figcaption align="middle">B: 0.3, D: 4.5</figcaption>
+                </td>
+            </tr>
+            <tr>
+                <td align="middle">
+                <img src="images/CBdragon_b0-2_d4-5.png" width="400px" />
+                <figcaption align="middle">B: 0.2, D: 4.5</figcaption>
+                </td>
+                <td align="middle">
+                <img src="images/CBdragon_b0-1_d4-5.png" width="400px" />
+                <figcaption align="middle">B: 0.1, D: 4.5</figcaption>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+
+</div>
+</body>
 </html>
